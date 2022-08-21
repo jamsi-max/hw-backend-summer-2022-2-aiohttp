@@ -1,5 +1,6 @@
 from typing import Optional
 
+from aiohttp_apispec import setup_aiohttp_apispec
 from aiohttp.web import (
     Application as AiohttpApplication,
     View as AiohttpView,
@@ -7,7 +8,7 @@ from aiohttp.web import (
 )
 
 from app.admin.models import Admin
-from app.store import setup_store, Store
+from app.store import setup_session, setup_store, Store
 from app.store.database.database import Database
 from app.web.config import Config, setup_config
 from app.web.logger import setup_logging
@@ -18,7 +19,7 @@ from app.web.routes import setup_routes
 class Application(AiohttpApplication):
     config: Optional[Config] = None
     store: Optional[Store] = None
-    database: Optional[Database] = None
+    database: Optional[Database] = None 
 
 
 class Request(AiohttpRequest):
@@ -50,6 +51,13 @@ def setup_app(config_path: str) -> Application:
     setup_logging(app)
     setup_config(app, config_path)
     setup_routes(app)
+    setup_aiohttp_apispec(
+        app,
+        title='VKBotApplication',
+        url='/docs/json',
+        swagger_path='/docs',
+    )
     setup_middlewares(app)
     setup_store(app)
+    setup_session(app)
     return app
